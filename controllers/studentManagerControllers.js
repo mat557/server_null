@@ -21,8 +21,8 @@ const getSingleStudent = async(req,res) =>{
 
         if(!student){
             return res.status(404).json({
-                user,
-                 message: 'Invalid student id' 
+                student,
+                message: 'Invalid student id' 
             })
         }
 
@@ -64,11 +64,18 @@ const getAllStudent = async (req,res) =>{
 const EditStudentData = async (req,res) =>{
     try{
         const db = getDb()
-        const { id , father_name  , mother_name , date_of_brth , village , district , stnd_class , img_link , name } = req.body
-
+        const { father_name  , mother_name , date_of_brth , village , district , stnd_class , img_link , name } = req.body
+        const id = req.params.id
         
     
         const query = { _id :new ObjectId(id) }
+
+        if(!id){
+            return res.status(404).json({
+                message : 'No id found',
+            })
+        }
+        // console.log(id)
 
         const student = await db.collection('student').findOne(query)
         if(!student){
@@ -98,6 +105,7 @@ const EditStudentData = async (req,res) =>{
 
 
         const result = await db.collection('student').updateOne(query, updateDoc, options);
+        // console.log(result)
 
         res.status(200).json(result)
 
@@ -112,8 +120,6 @@ const insertStudentData = async (req,res) =>{
     try{
         const db = getDb()
         const student_data = req.body
-
-        console.log(student_data)
     
         if(!student_data){
             return res.status(404).json({
@@ -138,8 +144,14 @@ const deleteStudent = async (req,res) =>{
 
         const query = { _id :new ObjectId(id) }
 
+        const student = await db.collection('student').findOne(query)
+        if(!student){
+            return res.status(404).json({
+                message : 'No student found',
+            })
+        }
+
         const delete_response = await db.collection('student').deleteOne(query)
-        // const delete_response = await db.collection('student').deleteOne(query)
 
         res.status(200).json(delete_response)
     }

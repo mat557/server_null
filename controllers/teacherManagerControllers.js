@@ -40,9 +40,10 @@ const getSingleTeacher = async(req,res) =>{
 const getAllTeacher = async (req,res) =>{
     try{
         const db = getDb()
+        
         const teachers = await db.collection('teacher').find().toArray()
-
-
+        
+        // console.log(teachers)
         if(!teachers.length){
             return res.status(400).json({
                 teachers,
@@ -65,9 +66,11 @@ const getAllTeacher = async (req,res) =>{
 const EditTeacherData = async (req,res) =>{
     try{
         const db = getDb()
-        const { name , position , number , per_address , id , img_link } = req.body
+        const { name , number , img_link } = req.body
+        const id = req.params.id
+        
+        console.log(id,req.body)
 
-    
         const query = { _id :new ObjectId(id) }
 
         const teacher = await db.collection('teacher').findOne(query)
@@ -84,9 +87,9 @@ const EditTeacherData = async (req,res) =>{
         const updateDoc = {
             $set: {
                 number : number ? number : teacher.number,
-                position : position ? position : teacher.position,
+                // position : position ? position : teacher.position,
                 name : name ? name : teacher.name,
-                per_address : per_address ? per_address : teacher.per_address,
+                // per_address : per_address ? per_address : teacher.per_address,
                 img_link : img_link ? img_link : teacher.img_link,
             }
         }
@@ -107,6 +110,7 @@ const insertTeachersData = async (req,res) =>{
     try{
         const db = getDb()
         const teachers_data = req.body
+
 
         if(!teachers_data){
             return res.status(404).json({
