@@ -1,6 +1,7 @@
 
 
-const createUserController = async (req,res) =>{
+
+const createNewCommitteMember = async (req,res) =>{
     try{}
     catch(err){
         console.log(err)
@@ -24,7 +25,7 @@ const logoutUserController = async (req,res) =>{
 }
 
 module.exports = {
-    createUserController,
+    createNewCommitteMember,
     loginUserController,
     logoutUserController
 }

@@ -10,6 +10,7 @@ const authRoute = require('./routes/authRoutes')
 const teacherManager = require('./routes/teacherManager')
 const studentManager = require('./routes/studentManager')
 const dashManager = require('./routes/dashManager')
+const committeManager = require('./routes/committeManager')
 
 
 
@@ -35,6 +36,7 @@ connectToServer()
 app.use('/auth'     , authRoute)
 app.use('/teacher'  , teacherManager)
 app.use('/student'  , studentManager)
+app.use('/member' , committeManager)
 app.use('/dash'     , dashManager)
 
 

@@ -44,7 +44,7 @@ const getAllStudent = async (req,res) =>{
 
         if(!students.length){
             return res.status(400).json({
-                user,
+                students,
                 message: 'No students found!'
             })
         }

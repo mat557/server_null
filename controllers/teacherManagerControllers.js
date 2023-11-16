@@ -68,8 +68,7 @@ const EditTeacherData = async (req,res) =>{
         const db = getDb()
         const { name , number , img_link } = req.body
         const id = req.params.id
-        
-        console.log(id,req.body)
+
 
         const query = { _id :new ObjectId(id) }
 
@@ -87,13 +86,10 @@ const EditTeacherData = async (req,res) =>{
         const updateDoc = {
             $set: {
                 number : number ? number : teacher.number,
-                // position : position ? position : teacher.position,
                 name : name ? name : teacher.name,
-                // per_address : per_address ? per_address : teacher.per_address,
                 img_link : img_link ? img_link : teacher.img_link,
             }
         }
-
 
         const result = await db.collection('teacher').updateMany(query, updateDoc, options)
 
@@ -132,6 +128,12 @@ const deleteTeacher = async (req,res) =>{
     try{
         const db = getDb()
         const id = req.params.id
+
+        if(!id){
+            return res.status(404).json({
+                message : 'No id found',
+            })
+        }
 
         const query = { _id :new ObjectId(id) }
 
