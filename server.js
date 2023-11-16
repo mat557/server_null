@@ -36,7 +36,7 @@ connectToServer()
 app.use('/auth'     , authRoute)
 app.use('/teacher'  , teacherManager)
 app.use('/student'  , studentManager)
-app.use('/member' , committeManager)
+app.use('/committe' , committeManager)
 app.use('/dash'     , dashManager)
 
 

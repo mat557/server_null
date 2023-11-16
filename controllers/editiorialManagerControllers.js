@@ -3,22 +3,22 @@ const { getDb } = require("../utils/dbConnects")
 
 
 
-const getAllCommitteMember = async (req,res) =>{
+const getAllEditorials = async (req,res) =>{
     try{
         const db = getDb()
         
-        const committe = await db.collection('committe').find().toArray()
+        const editorials = await db.collection('editorials').find().toArray()
         
         // console.log(teachers)
-        if(!committe.length){
+        if(!editorials.length){
             return res.status(400).json({
-                committe,
-                message: 'No committe member found!'
+                editorials,
+                message: 'No editorials member found!'
             })
         }
 
         res.status(200).json({
-            committe,
+            editorials,
             message: 'successfull!'
         })
     }
@@ -29,7 +29,7 @@ const getAllCommitteMember = async (req,res) =>{
 
 
 
-const createNewCommitteMember = async (req,res) =>{
+const createNewEditorials = async (req,res) =>{
     try{
         const db = getDb()
         const member_data = req.body
@@ -38,11 +38,11 @@ const createNewCommitteMember = async (req,res) =>{
 
         if(!member_data){
             return res.status(404).json({
-                message : 'No student found',
+                message : 'No data found',
             })
         }
 
-        const response = await db.collection('committe').insertOne(member_data)
+        const response = await db.collection('editorials').insertOne(member_data)
         console.log(response)
         res.status(200).json(response)
     }
@@ -55,7 +55,7 @@ const createNewCommitteMember = async (req,res) =>{
 const editCommitteMember = async (req,res) =>{
     try{
         const db = getDb()
-        const { name,email,number, occupation } = req.body
+        const { name , email , number , occupation , password } = req.body
         const id = req.params.id
 
 
@@ -114,8 +114,8 @@ const deleteCommitteMember = async (req,res) =>{
 }
 
 module.exports = {
-    getAllCommitteMember,
-    createNewCommitteMember,
+    getAllEditorials,
+    createNewEditorials,
     editCommitteMember,
     deleteCommitteMember
 }

@@ -5,7 +5,7 @@ const committeManagerControllers = require('../controllers/committeManagerContro
 
 router.route('/all').get(committeManagerControllers.getAllCommitteMember)
 router.route('/insert').put(committeManagerControllers.createNewCommitteMember)
-// router.route('/update/teacher').post(committeManagerControllers.loginUserController)
-// router.route('/delete/teacher').delete(committeManagerControllers.logoutUserController)
+router.route('/update/:id').patch(committeManagerControllers.editCommitteMember)
+router.route('/delete/:id').delete(committeManagerControllers.deleteCommitteMember)
 
 module.exports = router

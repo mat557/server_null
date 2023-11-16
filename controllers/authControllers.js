@@ -1,21 +1,109 @@
 const jwt = require('jsonwebtoken')
 const { getDb } = require("../utils/dbConnects")
 const bcrypt = require('bcrypt')
+const { ObjectId } = require('mongodb')
 
+
+
+const getAlleUser = async(req,res) =>{
+    try{
+        const db = getDb()
+
+        const options = {
+            projection: { password: 0}
+        }
+
+        const editorial = await db.collection('editorial').find({},options).toArray()
+
+        if(!editorial.length){
+            return res.status(400).json({
+                editorial,
+                message: 'No user found!'
+            })
+        }
+
+        res.status(200).json({
+            editorial,
+            message: 'Successful!'
+        })
+
+    }catch(err){
+        console.log(err)
+        res.status(500).json({
+            error: 'Internal Server Error',
+        });
+    }
+}
+
+
+
+const updateEditorials = async(req,res) =>{
+    try{
+        const db = getDb()
+        const { email , name , number , role , status , password } = req.body
+
+        let hashedPass
+        if(password.length){
+            const saltRounds = 10;
+            hashedPass = await bcrypt.hash( password , saltRounds )
+        }
+
+
+        const query = { email : email }
+
+        const user = await db.collection('editorial').findOne(query)
+        if(!user){
+            return res.status(403).json({
+                message : 'No user found',
+            })
+        }
+
+        const options = { upsert: true };
+
+        let setStatus
+
+        if(status !== user.status){
+            setStatus = status
+        }else{
+            setStatus = user.status
+        }
+
+
+        const updateDoc = {
+            $set: {
+                email : email,
+                password: password ? hashedPass : user.password,
+                number : number ? number : user.number,
+                role : role ? role : user.role,
+                name : name ? name : user.name,
+                status : setStatus
+            },
+        };
+
+        const result = await db.collection('editorial').updateOne(query, updateDoc, options);
+        
+
+        res.status(200).json(result)
+
+    }catch(err){
+        console.log(err)
+    }
+}
 
 
 const createUserController = async (req,res) =>{
     try{
         const db = getDb()
-        const { email , name , password , number } = req.body
+        const { email , name , password , number , role } = req.body
 
-        console.log(req.body)
+   
 
-        if(!email || !name || !password || !number){
+        if(!email || !name || !password || !number || !role){
             return res.status(404).json({ 
                 message : `No empty field allowed!`
             })
         }
+
 
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
             return res.status(400).json({
@@ -24,12 +112,24 @@ const createUserController = async (req,res) =>{
         }
 
 
+        const query1 = { role : role }
+        const options1 = {
+            projection: { email : 1 }
+        }
+
+        const isAdmin = await db.collection('editorial').findOne(query1,options1)
+        if(isAdmin === 'admin'){
+            return res.status(404).json({ 
+                message : `The website has already an admin`
+            })
+        }
+
         const query = { email : email }
         const options = {
             projection: { email : 1 }
         }
 
-        const match = await db.collection('user').findOne(query,options)
+        const match = await db.collection('editorial').findOne(query,options)
         if(match){
             return res.status(404).json({ 
                 message : `User with email ${match.email} exist already. Please login`
@@ -45,14 +145,14 @@ const createUserController = async (req,res) =>{
             name : name,
             password: hashedPass,
             number : number,
-            role : '',
+            role : role,
         }
 
 
 
         const jwt_user_data = {
             email:email,
-            role: ''
+            role: role
         }
 
         const access_token = jwt.sign({
@@ -68,7 +168,7 @@ const createUserController = async (req,res) =>{
           { expiresIn: '1h' }
         )
 
-        const response = await db.collection('user').insertOne(user_doc)
+        const response = await db.collection('editorial').insertOne(user_doc)
 
         res.cookie('refresh_token', refresh_token,{
             httpOnly: true, 
@@ -77,13 +177,16 @@ const createUserController = async (req,res) =>{
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
-        res.status(200).json({ 
-            response ,
-            access_token,
-            refresh_token
-        })
-
-
+        if(role === 'admin'){
+            res.status(200).json({
+                response ,
+                access_token
+            })
+        }else{
+            res.status(200).json({ 
+                response
+            })
+        }
     }
     catch(err){
         console.log(err)
@@ -91,11 +194,10 @@ const createUserController = async (req,res) =>{
 }
 
 
-const loginUserController = async (req,res) =>{
+const loginEditorialController = async (req,res) =>{
     try{
         const db = getDb()
         const { email , password } = req.body
-
 
         if(!email || !password){
             return res.status(404).json({ 
@@ -110,7 +212,7 @@ const loginUserController = async (req,res) =>{
         }
 
         const query = { email : email }
-        const user = await db.collection('users').findOne(query)
+        const user = await db.collection('editorial').findOne(query)
         
 
         if(email !== user.email){
@@ -134,12 +236,6 @@ const loginUserController = async (req,res) =>{
             role: user.role
         }
 
-        const refresh_token = jwt.sign({
-            data: jwt_user_data
-          }, process.env.ACCESS_TOKEN_SECRET, 
-          { expiresIn: '1h' }
-        );
-
         const access_token = jwt.sign({
             data: jwt_user_data
           }, process.env.ACCESS_TOKEN_SECRET, 
@@ -147,20 +243,10 @@ const loginUserController = async (req,res) =>{
         );
 
 
-        res.cookie('token',
-            access_token,
-        { 
-            maxAge: 900000, 
-            httpOnly: true ,
-            sameSite: 'None', 
-            secure: true,
-        })
-        
         res.status(200).json({
             message: 'User found!',
             additional : 'Login successfull',
-            access_token,
-            refresh_token
+            access_token
         })
     }
     catch(err){
@@ -221,7 +307,7 @@ const getSingleUserByToken = async(req,res) =>{
             projection: { password: 0 }
         }
 
-        const user = await db.collection('users').findOne(query,options)
+        const user = await db.collection('editorial').findOne(query,options)
         
         const jwt_user_data = {
             email: user.email,
@@ -245,9 +331,35 @@ const getSingleUserByToken = async(req,res) =>{
 }
 
 
+const deleteEditoriaMember = async (req,res) =>{
+    try{
+        const db = getDb()
+        const id = req.params.id
+        // console.log(id)
+
+        if(!id){
+            return res.status(404).json({
+                message : 'No id found',
+            })
+        }
+
+        const query = { _id :new ObjectId(id) }
+
+        const delete_response = await db.collection('editorial').deleteOne(query)
+
+        res.status(200).json(delete_response)
+    }
+    catch(err){
+        console.log(err)
+    }
+}
+
 module.exports = {
+    getAlleUser,
     createUserController,
-    loginUserController,
+    loginEditorialController,
     logoutUserController,
-    getSingleUserByToken
+    getSingleUserByToken,
+    updateEditorials,
+    deleteEditoriaMember
 }
