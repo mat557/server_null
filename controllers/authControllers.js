@@ -96,7 +96,6 @@ const createUserController = async (req,res) =>{
         const db = getDb()
         const { email , name , password , number , role } = req.body
 
-   
 
         if(!email || !name || !password || !number || !role){
             return res.status(404).json({ 
@@ -113,12 +112,10 @@ const createUserController = async (req,res) =>{
 
 
         const query1 = { role : role }
-        const options1 = {
-            projection: { email : 1 }
-        }
 
-        const isAdmin = await db.collection('editorial').findOne(query1,options1)
-        if(isAdmin === 'admin'){
+        const isAdmin = await db.collection('editorial').findOne(query1)
+
+        if(isAdmin && isAdmin.role === 'admin'){
             return res.status(404).json({ 
                 message : `The website has already an admin`
             })
@@ -179,7 +176,7 @@ const createUserController = async (req,res) =>{
 
         if(role === 'admin'){
             res.status(200).json({
-                response ,
+                response,
                 access_token
             })
         }else{
@@ -335,7 +332,6 @@ const deleteEditoriaMember = async (req,res) =>{
     try{
         const db = getDb()
         const id = req.params.id
-        // console.log(id)
 
         if(!id){
             return res.status(404).json({
@@ -354,6 +350,24 @@ const deleteEditoriaMember = async (req,res) =>{
     }
 }
 
+
+const adminChecker = async(req,res) =>{
+    try{
+        const db = getDb()
+        let present = false
+        const query = { role : 'admin'}
+        const isAdmin = await db.collection('editorial').findOne(query)
+
+        if(isAdmin){
+            present = true
+        }
+
+        res.status(200).json({present})
+    }catch(err){
+        console.log(err)
+    }
+}
+
 module.exports = {
     getAlleUser,
     createUserController,
@@ -361,5 +375,6 @@ module.exports = {
     logoutUserController,
     getSingleUserByToken,
     updateEditorials,
-    deleteEditoriaMember
+    deleteEditoriaMember,
+    adminChecker
 }

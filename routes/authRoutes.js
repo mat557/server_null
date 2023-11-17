@@ -4,6 +4,7 @@ const authControllers = require('../controllers/authControllers')
 
 
 router.route('/all').get(authControllers.getAlleUser)
+router.route('/admin').get(authControllers.adminChecker)
 router.route('/create').put(authControllers.createUserController)
 router.route('/update').patch(authControllers.updateEditorials)
 router.route('/login').post(authControllers.loginEditorialController)
