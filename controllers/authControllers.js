@@ -196,6 +196,7 @@ const loginEditorialController = async (req,res) =>{
         const db = getDb()
         const { email , password } = req.body
 
+
         if(!email || !password){
             return res.status(404).json({ 
                 message : `No empty field allowed!`
@@ -211,16 +212,22 @@ const loginEditorialController = async (req,res) =>{
         const query = { email : email }
         const user = await db.collection('editorial').findOne(query)
         
-
-        if(email !== user.email){
+        if(!user){
             return res.status(403).json({
                 message: 'Invaid email or password!',
                 suggest : 'Please try again or create account.'
             })
         }
 
-        const matched = await bcrypt.compare(password, user.password)
+        if (!user.password) {
+            return res.status(403).json({
+                message: 'Invalid email or password!',
+                suggest: 'Please try again or create an account.'
+            });
+        }
 
+        const matched = await bcrypt.compare(password, user?.password)
+        
         if(!matched){
             return res.status(403).json({ 
                 message : 'Invalid email or password!',
