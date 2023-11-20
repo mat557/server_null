@@ -40,7 +40,10 @@ const getAlleUser = async(req,res) =>{
 const updateEditorials = async(req,res) =>{
     try{
         const db = getDb()
+        const id = req.params
         const { email , name , number , role , status , password } = req.body
+        
+
 
         let hashedPass
         if(password.length){
@@ -48,8 +51,7 @@ const updateEditorials = async(req,res) =>{
             hashedPass = await bcrypt.hash( password , saltRounds )
         }
 
-
-        const query = { email : email }
+        const query = { _id : new ObjectId(id) }
 
         const user = await db.collection('editorial').findOne(query)
         if(!user){
@@ -71,12 +73,11 @@ const updateEditorials = async(req,res) =>{
 
         const updateDoc = {
             $set: {
-                email : email,
+                email : email ? email : user.email,
                 password: password ? hashedPass : user.password,
                 number : number ? number : user.number,
                 role : role ? role : user.role,
                 name : name ? name : user.name,
-                status : setStatus
             },
         };
 
@@ -158,21 +159,21 @@ const createUserController = async (req,res) =>{
           { expiresIn: '1h' }
         )
 
-        const refresh_token = jwt.sign({
-            data: jwt_user_data
-          }, 
-          process.env.ACCESS_TOKEN_SECRET, 
-          { expiresIn: '1h' }
-        )
+        // const refresh_token = jwt.sign({
+        //     data: jwt_user_data
+        //   }, 
+        //   process.env.ACCESS_TOKEN_SECRET, 
+        //   { expiresIn: '1h' }
+        // )
 
         const response = await db.collection('editorial').insertOne(user_doc)
 
-        res.cookie('refresh_token', refresh_token,{
-            httpOnly: true, 
-            secure: true, 
-            sameSite: 'None',  
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+        // res.cookie('refresh_token', refresh_token,{
+        //     httpOnly: true, 
+        //     secure: true, 
+        //     sameSite: 'None',  
+        //     maxAge: 7 * 24 * 60 * 60 * 1000
+        // })
 
         if(role === 'admin'){
             res.status(200).json({
@@ -362,14 +363,17 @@ const adminChecker = async(req,res) =>{
     try{
         const db = getDb()
         let present = false
+        let admin_e = ''
         const query = { role : 'admin'}
-        const isAdmin = await db.collection('editorial').findOne(query)
 
+        const isAdmin = await db.collection('editorial').findOne(query)
+        admin_e = isAdmin.email
+  
         if(isAdmin){
             present = true
         }
 
-        res.status(200).json({present})
+        res.status(200).json({present,admin_e})
     }catch(err){
         console.log(err)
     }

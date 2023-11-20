@@ -43,7 +43,7 @@ const createNewCommitteMember = async (req,res) =>{
         }
 
         const response = await db.collection('committe').insertOne(member_data)
-        console.log(response)
+  
         res.status(200).json(response)
     }
     catch(err){
@@ -58,7 +58,7 @@ const editCommitteMember = async (req,res) =>{
         const { name,email,number, occupation } = req.body
         const id = req.params.id
 
-
+        console.log(id,req.body)
         const query = { _id :new ObjectId(id) }
 
         const member = await db.collection('committe').findOne(query)
@@ -74,6 +74,7 @@ const editCommitteMember = async (req,res) =>{
 
         const updateDoc = {
             $set: {
+                name : name ? name : member.name,
                 number : number ? number : member.number,
                 email : email ? email : member.email,
                 name : name ? name : member.name,
@@ -95,7 +96,7 @@ const deleteCommitteMember = async (req,res) =>{
     try{
         const db = getDb()
         const id = req.params.id
-        console.log(id)
+
         if(!id){
             return res.status(404).json({
                 message : 'No id found',

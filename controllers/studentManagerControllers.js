@@ -127,7 +127,9 @@ const insertStudentData = async (req,res) =>{
             })
         }
 
-        const response = await db.collection('student').insertMany(student_data)
+        const dataArray = Array.isArray(student_data) ? student_data : [student_data]
+
+        const response = await db.collection('student').insertMany(dataArray)
 
         res.status(200).json(response)
     }

@@ -9,9 +9,7 @@ const port = process.env.PORT || 7071
 const authRoute = require('./routes/authRoutes')
 const teacherManager = require('./routes/teacherManager')
 const studentManager = require('./routes/studentManager')
-const dashManager = require('./routes/dashManager')
 const committeManager = require('./routes/committeManager')
-
 
 
 app.use(cors())
@@ -37,7 +35,6 @@ app.use('/auth'     , authRoute)
 app.use('/teacher'  , teacherManager)
 app.use('/student'  , studentManager)
 app.use('/committe' , committeManager)
-app.use('/dash'     , dashManager)
 
 
 
