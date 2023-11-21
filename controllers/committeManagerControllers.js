@@ -2,7 +2,6 @@ const { ObjectId } = require("mongodb")
 const { getDb } = require("../utils/dbConnects")
 
 
-
 const getAllCommitteMember = async (req,res) =>{
     try{
         const db = getDb()
@@ -21,8 +20,7 @@ const getAllCommitteMember = async (req,res) =>{
             committe,
             message: 'successfull!'
         })
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
@@ -34,7 +32,14 @@ const createNewCommitteMember = async (req,res) =>{
         const db = getDb()
         const member_data = req.body
 
-        // console.log(member_data)
+        const email_d = req.email 
+        const role_d  = req.role
+        
+        if(!email_d && (role_d !== 'admin' || role_d !== 'editor')){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
 
         if(!member_data){
             return res.status(404).json({
@@ -45,8 +50,7 @@ const createNewCommitteMember = async (req,res) =>{
         const response = await db.collection('committe').insertOne(member_data)
   
         res.status(200).json(response)
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
@@ -58,20 +62,24 @@ const editCommitteMember = async (req,res) =>{
         const { name,email,number, occupation } = req.body
         const id = req.params.id
 
-        console.log(id,req.body)
+        const email_d = req.email 
+        const role_d  = req.role
+        
+        if(!email_d && (role_d !== 'admin' || role_d !== 'editor')){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
+
         const query = { _id :new ObjectId(id) }
-
         const member = await db.collection('committe').findOne(query)
-
         if(!member){
             return res.status(404).json({
                 message : 'No member found with this id',
             })
         }
 
-
         const options = { upsert: true }
-
         const updateDoc = {
             $set: {
                 name : name ? name : member.name,
@@ -85,8 +93,7 @@ const editCommitteMember = async (req,res) =>{
         const result = await db.collection('committe').updateMany(query, updateDoc, options)
 
         res.status(200).json(result)
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
@@ -97,6 +104,15 @@ const deleteCommitteMember = async (req,res) =>{
         const db = getDb()
         const id = req.params.id
 
+        const email_d = req.email 
+        const role_d  = req.role
+        
+        if(!email_d && (role_d !== 'admin' || role_d !== 'editor')){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
+
         if(!id){
             return res.status(404).json({
                 message : 'No id found',
@@ -104,12 +120,9 @@ const deleteCommitteMember = async (req,res) =>{
         }
 
         const query = { _id :new ObjectId(id) }
-
         const delete_response = await db.collection('committe').deleteOne(query)
-
         res.status(200).json(delete_response)
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }

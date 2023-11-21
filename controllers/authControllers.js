@@ -4,13 +4,21 @@ const bcrypt = require('bcrypt')
 const { ObjectId } = require('mongodb')
 
 
-
 const getAlleUser = async(req,res) =>{
     try{
         const db = getDb()
 
         const options = {
             projection: { password: 0}
+        }
+        
+        const email_d = req.email 
+        const role_d  = req.role
+
+        if(!email_d && !role_d){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
         }
 
         const editorial = await db.collection('editorial').find({},options).toArray()
@@ -42,8 +50,15 @@ const updateEditorials = async(req,res) =>{
         const db = getDb()
         const id = req.params
         const { email , name , number , role , status , password } = req.body
-        
 
+        const email_d = req.email 
+        const role_d  = req.role
+
+        if(!email_d && (role_d === 'admin' || role_d === 'editor')){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
 
         let hashedPass
         if(password.length){
@@ -70,7 +85,6 @@ const updateEditorials = async(req,res) =>{
             setStatus = user.status
         }
 
-
         const updateDoc = {
             $set: {
                 email : email ? email : user.email,
@@ -82,7 +96,7 @@ const updateEditorials = async(req,res) =>{
         };
 
         const result = await db.collection('editorial').updateOne(query, updateDoc, options);
-        
+
 
         res.status(200).json(result)
 
@@ -104,13 +118,73 @@ const createUserController = async (req,res) =>{
             })
         }
 
-
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
             return res.status(400).json({
               message: 'Invalid email format!',
             });
         }
 
+        const email_d = req.email 
+        const role_d  = req.role
+
+        if(!email_d && role_d === 'admin'){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
+
+
+        const query = { email : email }
+        const options = {
+            projection: { email : 1 }
+        }
+
+        const match = await db.collection('editorial').findOne(query,options)
+        if(match){
+            return res.status(404).json({ 
+                message : `User with email ${match.email} exist already. Please login`
+            })
+        }
+
+        const saltRounds = 10;
+        const hashedPass = await bcrypt.hash( password , saltRounds )
+
+        const user_doc = {
+            email : email,
+            name : name,
+            password: hashedPass,
+            number : number,
+            role : role,
+        }
+
+        const response = await db.collection('editorial').insertOne(user_doc)
+
+        res.status(200).json({ 
+            response
+        })
+    }catch(err){
+        console.log(err)
+    }
+}
+
+
+const signUpForAdmin = async (req,res) =>{
+    try{
+        const db = getDb()
+        const { email , name , password , number , role } = req.body
+
+
+        if(!email || !name || !password || !number || !role){
+            return res.status(404).json({ 
+                message : `No empty field allowed!`
+            })
+        }
+
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
+            return res.status(400).json({
+              message: 'Invalid email format!',
+            });
+        }
 
         const query1 = { role : role }
 
@@ -146,8 +220,6 @@ const createUserController = async (req,res) =>{
             role : role,
         }
 
-
-
         const jwt_user_data = {
             email:email,
             role: role
@@ -159,34 +231,15 @@ const createUserController = async (req,res) =>{
           { expiresIn: '1h' }
         )
 
-        // const refresh_token = jwt.sign({
-        //     data: jwt_user_data
-        //   }, 
-        //   process.env.ACCESS_TOKEN_SECRET, 
-        //   { expiresIn: '1h' }
-        // )
 
         const response = await db.collection('editorial').insertOne(user_doc)
 
-        // res.cookie('refresh_token', refresh_token,{
-        //     httpOnly: true, 
-        //     secure: true, 
-        //     sameSite: 'None',  
-        //     maxAge: 7 * 24 * 60 * 60 * 1000
-        // })
 
-        if(role === 'admin'){
-            res.status(200).json({
-                response,
-                access_token
-            })
-        }else{
-            res.status(200).json({ 
-                response
-            })
-        }
-    }
-    catch(err){
+        res.status(200).json({ 
+            response,
+            access_token
+        })
+    }catch(err){
         console.log(err)
     }
 }
@@ -245,7 +298,8 @@ const loginEditorialController = async (req,res) =>{
             data: jwt_user_data
           }, process.env.ACCESS_TOKEN_SECRET, 
           { expiresIn: '1h' }
-        );
+        )
+
 
 
         res.status(200).json({
@@ -272,68 +326,11 @@ const logoutUserController = async (req,res) =>{
             message: 'Process successfull' 
         })
 
-    }
-    catch(err){
-        console.log(err)
-    }
-}
-
-
-
-const getSingleUserByToken = async(req,res) =>{
-    try{
-        const db = getDb()
-        const token = req.params.token
-
-        if(!token){
-            return res.status(403).json({
-                message : 'Please login or create an account!'
-            })
-        }
-
-        // console.log(token)
-
-        var decoded;
-
-        try {
-            decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        } catch (err) {
-            console.error(err);
-            return res.status(401).json({
-                message: 'Invalid token'
-
-            });
-        }
-
-        // console.log(decoded)
-
-        const query = { email: decoded.data.email}
-        const options = {
-            projection: { password: 0 }
-        }
-
-        const user = await db.collection('editorial').findOne(query,options)
-        
-        const jwt_user_data = {
-            email: user.email,
-            role: user.role ||  ''
-        }
-
-        const access_token = jwt.sign({
-            data: jwt_user_data
-          }, process.env.ACCESS_TOKEN_SECRET, 
-          { expiresIn: '1h' }
-        );
-
-        res.status(200).json({
-            user,
-            access_token
-        })
-
     }catch(err){
         console.log(err)
     }
 }
+
 
 
 const deleteEditoriaMember = async (req,res) =>{
@@ -346,14 +343,22 @@ const deleteEditoriaMember = async (req,res) =>{
                 message : 'No id found',
             })
         }
+        
+        const email_d = req.email 
+        const role_d  = req.role
+
+        if(!email_d && role_d === 'admin'){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
 
         const query = { _id :new ObjectId(id) }
 
         const delete_response = await db.collection('editorial').deleteOne(query)
 
         res.status(200).json(delete_response)
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
@@ -382,9 +387,9 @@ const adminChecker = async(req,res) =>{
 module.exports = {
     getAlleUser,
     createUserController,
+    signUpForAdmin,
     loginEditorialController,
     logoutUserController,
-    getSingleUserByToken,
     updateEditorials,
     deleteEditoriaMember,
     adminChecker

@@ -8,7 +8,7 @@ const getSingleStudent = async(req,res) =>{
     try{
         const db = getDb()
         const id = req.params.id
-        
+
         if(!id){
             return res.status(404).json({
                 message: 'Id required!' 
@@ -16,7 +16,7 @@ const getSingleStudent = async(req,res) =>{
         }
 
         const query = { _id :new ObjectId(id) }
-        
+
         const student = await db.collection('student').findOne(query)
 
         if(!student){
@@ -54,8 +54,7 @@ const getAllStudent = async (req,res) =>{
             message: 'students found successfully!'
         })
 
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
@@ -64,18 +63,15 @@ const getAllStudent = async (req,res) =>{
 const EditStudentData = async (req,res) =>{
     try{
         const db = getDb()
-        const { father_name  , mother_name , date_of_brth , village , district , stnd_class , img_link , name } = req.body
         const id = req.params.id
-        
-    
-        const query = { _id :new ObjectId(id) }
+        const { father_name  , mother_name , date_of_brth , village , district , stnd_class , img_link , name } = req.body
 
+        const query = { _id :new ObjectId(id) }
         if(!id){
             return res.status(404).json({
                 message : 'No id found',
             })
         }
-        // console.log(id)
 
         const student = await db.collection('student').findOne(query)
         if(!student){
@@ -101,29 +97,41 @@ const EditStudentData = async (req,res) =>{
             }
         }
 
+        const email_d = req.email 
+        const role_d  = req.role
+        console.log(email_d,typeof(role_d),typeof('admin'))
 
-
+        if(!email_d && (role_d === 'admin' || role_d === 'editor')){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
 
         const result = await db.collection('student').updateOne(query, updateDoc, options);
-        // console.log(result)
-
         res.status(200).json(result)
-
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
-
 
 const insertStudentData = async (req,res) =>{
     try{
         const db = getDb()
         const student_data = req.body
-    
+        
         if(!student_data){
             return res.status(404).json({
                 message : 'Recieved no data',
+            })
+        }
+
+        const email_d = req.email 
+        const role_d  = req.role
+        console.log(email_d,typeof(role_d),typeof('admin'))
+
+        if(!email_d && (role_d === 'admin' || role_d === 'editor')){
+            return res.status(404).json({
+                message : 'Unauthorized',
             })
         }
 
@@ -132,8 +140,7 @@ const insertStudentData = async (req,res) =>{
         const response = await db.collection('student').insertMany(dataArray)
 
         res.status(200).json(response)
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
@@ -146,6 +153,18 @@ const deleteStudent = async (req,res) =>{
 
         const query = { _id :new ObjectId(id) }
 
+        
+        const email_d = req.email 
+        const role_d  = req.role
+        console.log(email_d,typeof(role_d),typeof('admin'))
+
+        if(!email_d && (role_d === 'admin' || role_d === 'editor')){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
+
+
         const student = await db.collection('student').findOne(query)
         if(!student){
             return res.status(404).json({
@@ -156,8 +175,7 @@ const deleteStudent = async (req,res) =>{
         const delete_response = await db.collection('student').deleteOne(query)
 
         res.status(200).json(delete_response)
-    }
-    catch(err){
+    }catch(err){
         console.log(err)
     }
 }
