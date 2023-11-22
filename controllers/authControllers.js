@@ -228,7 +228,7 @@ const signUpForAdmin = async (req,res) =>{
         const access_token = jwt.sign({
             data: jwt_user_data
           }, process.env.ACCESS_TOKEN_SECRET, 
-          { expiresIn: '1h' }
+          { expiresIn: '7d' }
         )
 
 
@@ -284,7 +284,6 @@ const loginEditorialController = async (req,res) =>{
         if(!matched){
             return res.status(403).json({ 
                 message : 'Invalid email or password!',
-                suggest : 'Please try again or create account.'
             })
         }
 
@@ -296,7 +295,7 @@ const loginEditorialController = async (req,res) =>{
         const access_token = jwt.sign({
             data: jwt_user_data
           }, process.env.ACCESS_TOKEN_SECRET, 
-          { expiresIn: '1h' }
+          { expiresIn: '7d' }
         )
 
         res.status(200).json({

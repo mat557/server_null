@@ -99,7 +99,6 @@ const EditStudentData = async (req,res) =>{
 
         const email_d = req.email 
         const role_d  = req.role
-        console.log(email_d,typeof(role_d),typeof('admin'))
 
         if(!email_d && (role_d === 'admin' || role_d === 'editor')){
             return res.status(404).json({
@@ -118,6 +117,8 @@ const insertStudentData = async (req,res) =>{
     try{
         const db = getDb()
         const student_data = req.body
+
+        console.log(req.body)
         
         if(!student_data){
             return res.status(404).json({
@@ -127,7 +128,7 @@ const insertStudentData = async (req,res) =>{
 
         const email_d = req.email 
         const role_d  = req.role
-        console.log(email_d,typeof(role_d),typeof('admin'))
+        // console.log(email_d,typeof(role_d),typeof('admin'))
 
         if(!email_d && (role_d === 'admin' || role_d === 'editor')){
             return res.status(404).json({
@@ -156,7 +157,6 @@ const deleteStudent = async (req,res) =>{
         
         const email_d = req.email 
         const role_d  = req.role
-        console.log(email_d,typeof(role_d),typeof('admin'))
 
         if(!email_d && (role_d === 'admin' || role_d === 'editor')){
             return res.status(404).json({
