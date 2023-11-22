@@ -11,6 +11,7 @@ const teacherManager = require('./routes/teacherManager')
 const studentManager = require('./routes/studentManager')
 const committeManager = require('./routes/committeManager')
 
+
 app.use(cors())
 // app.use(cors(corsOption))
 app.use(express.urlencoded({ extended: true }));
