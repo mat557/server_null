@@ -293,16 +293,11 @@ const loginEditorialController = async (req,res) =>{
             role: user.role
         }
 
-        // const access_token = jwt.sign({
-        //     data: jwt_user_data
-        //   }, process.env.ACCESS_TOKEN_SECRET, 
-        //   { expiresIn: '1h' }
-        // )
-
         const access_token = jwt.sign({
-            exp: Math.floor(Date.now() / 1000) + (60 * 60),
             data: jwt_user_data
-          }, process.env.ACCESS_TOKEN_SECRET)
+          }, process.env.ACCESS_TOKEN_SECRET, 
+          { expiresIn: '1h' }
+        )
 
         res.status(200).json({
             message: 'User found!',
