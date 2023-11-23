@@ -127,7 +127,7 @@ const createUserController = async (req,res) =>{
         const email_d = req.email 
         const role_d  = req.role
 
-        if(!email_d && role_d === 'admin'){
+        if(!email_d && !role_d === 'admin'){
             return res.status(404).json({
                 message : 'Unauthorized',
             })
@@ -172,7 +172,6 @@ const signUpForAdmin = async (req,res) =>{
     try{
         const db = getDb()
         const { email , name , password , number , role } = req.body
-
 
         if(!email || !name || !password || !number || !role){
             return res.status(404).json({ 
@@ -266,14 +265,14 @@ const loginEditorialController = async (req,res) =>{
         const user = await db.collection('editorial').findOne(query)
         
         if(!user){
-            return res.status(403).json({
+            return res.status(404).json({
                 message: 'Invaid email or password!',
                 suggest : 'Please try again or create account.'
             })
         }
 
         if (!user.password) {
-            return res.status(403).json({
+            return res.status(404).json({
                 message: 'Invalid email or password!',
                 suggest: 'Please try again or create an account.'
             });
