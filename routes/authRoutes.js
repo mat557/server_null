@@ -9,6 +9,7 @@ router.route('/login').post(authControllers.loginEditorialController)
 router.route('/signup').post(authControllers.signUpForAdmin)
 router.route('/logout').post(authControllers.logoutUserController)
 router.route('/admin').get(authControllers.adminChecker)
+router.route('/single/:email/:role').get(authControllers.getSingleUser)
 
 router.use(verifyJWT)
 router.route('/all').get(authControllers.getAlleUser)

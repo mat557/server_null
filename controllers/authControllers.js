@@ -45,6 +45,37 @@ const getAlleUser = async(req,res) =>{
 
 
 
+const getSingleUser = async(req,res) =>{
+    try{
+        const db = getDb()
+        const { email , role } = req.params
+        
+        const query = { email : email }
+
+        const user = await db.collection('editorial').findOne(query)
+        if(!user){
+            return res.status(404).json({
+                message : 'No user found',
+            })
+        }
+
+        if(role === user.role){
+            console.log(role === user.role)
+            res.status(200).json(true)
+        }else{
+            console.log(role === user.role)
+            res.status(404).json(false)
+        }
+    }catch(err){
+        console.log(err)
+        res.status(500).json({
+            error: 'Internal Server Error',
+        });
+    }
+}
+
+
+
 const updateEditorials = async(req,res) =>{
     try{
         const db = getDb()
@@ -381,6 +412,7 @@ const adminChecker = async(req,res) =>{
 
 module.exports = {
     getAlleUser,
+    getSingleUser,
     createUserController,
     signUpForAdmin,
     loginEditorialController,
