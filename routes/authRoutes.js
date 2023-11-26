@@ -18,6 +18,7 @@ router.route('/image/upload').put(authControllers.uploadImage)
 router.route('/create').put(authControllers.createUserController)
 router.route('/update/:id').patch(authControllers.updateEditorials)
 router.route('/delete/:id').delete(authControllers.deleteEditoriaMember)
+router.route('/delete/image/:id').delete(authControllers.deleteImage)
 
 
 module.exports = router

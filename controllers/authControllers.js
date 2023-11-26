@@ -433,6 +433,38 @@ const deleteEditoriaMember = async (req,res) =>{
 }
 
 
+
+const deleteImage = async (req,res) =>{
+    try{
+        const db = getDb()
+        const id = req.params.id
+
+        if(!id){
+            return res.status(404).json({
+                message : 'No id found',
+            })
+        }
+        
+        const email_d = req.email 
+        const role_d  = req.role
+
+        if(!email_d && role_d === 'admin'){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
+
+        const query = { _id :new ObjectId(id) }
+
+        const delete_response = await db.collection('image').deleteOne(query)
+
+        res.status(200).json(delete_response)
+    }catch(err){
+        console.log(err)
+    }
+}
+
+
 const adminChecker = async(req,res) =>{
     try{
         const db = getDb()
@@ -464,5 +496,6 @@ module.exports = {
     logoutUserController,
     updateEditorials,
     deleteEditoriaMember,
+    deleteImage,
     adminChecker
 }
