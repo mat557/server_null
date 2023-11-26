@@ -4,6 +4,16 @@ const bcrypt = require('bcrypt')
 const { ObjectId } = require('mongodb')
 
 
+const getAllImage = async(req,res) =>{
+    try{
+        const db = getDb()
+        const editorial = await db.collection('image').find().toArray()
+        res.status(200).json(editorial)
+    }catch(err){
+        console.log(err)
+    }
+}
+
 const getAlleUser = async(req,res) =>{
     try{
         const db = getDb()
@@ -20,7 +30,6 @@ const getAlleUser = async(req,res) =>{
                 message : 'Unauthorized',
             })
         }
-
         const editorial = await db.collection('editorial').find({},options).toArray()
 
         if(!editorial.length){
@@ -54,9 +63,7 @@ const getSingleUser = async(req,res) =>{
 
         const user = await db.collection('editorial').findOne(query)
         if(!user){
-            return res.status(404).json({
-                message : 'No user found',
-            })
+            return res.status(404).json(false)
         }
 
         if(role === user.role){
@@ -70,7 +77,7 @@ const getSingleUser = async(req,res) =>{
         console.log(err)
         res.status(500).json({
             error: 'Internal Server Error',
-        });
+        })
     }
 }
 
@@ -198,6 +205,42 @@ const createUserController = async (req,res) =>{
     }
 }
 
+const uploadImage = async(req,res) =>{
+    try{
+        const db = getDb()
+        const { img_link , title } = req.body
+        console.log(img_link)
+        if(!img_link , !title){
+            return res.status(404).json({ 
+                message : `No empty field allowed!`
+            })
+        }
+
+        const email_d = req.email 
+        const role_d  = req.role
+
+        if(!email_d && !role_d === 'admin'){
+            return res.status(404).json({
+                message : 'Unauthorized',
+            })
+        }
+
+        const img_doc = {
+            img_link : img_link,
+            title:title
+        }
+
+        const response = await db.collection('image').insertOne(img_doc)
+        res.status(200).json(response)
+    }catch(err){
+
+    }
+}
+
+
+const getImage = async(req,res) =>{
+
+}
 
 const signUpForAdmin = async (req,res) =>{
     try{
@@ -413,7 +456,9 @@ const adminChecker = async(req,res) =>{
 module.exports = {
     getAlleUser,
     getSingleUser,
+    getAllImage,
     createUserController,
+    uploadImage,
     signUpForAdmin,
     loginEditorialController,
     logoutUserController,

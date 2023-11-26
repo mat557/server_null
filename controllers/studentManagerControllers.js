@@ -1,6 +1,8 @@
 const { ObjectId } = require("mongodb")
 const { getDb } = require("../utils/dbConnects")
-
+const fileUpload = require("express-fileupload")
+const path = require("path")
+const fs = require('fs')
 
 
 
@@ -117,8 +119,6 @@ const insertStudentData = async (req,res) =>{
     try{
         const db = getDb()
         const student_data = req.body
-
-        console.log(req.body)
         
         if(!student_data){
             return res.status(404).json({
@@ -128,18 +128,14 @@ const insertStudentData = async (req,res) =>{
 
         const email_d = req.email 
         const role_d  = req.role
-        // console.log(email_d,typeof(role_d),typeof('admin'))
 
         if(!email_d && (role_d === 'admin' || role_d === 'editor')){
             return res.status(404).json({
                 message : 'Unauthorized',
             })
         }
-
-        const dataArray = Array.isArray(student_data) ? student_data : [student_data]
-
-        const response = await db.collection('student').insertMany(dataArray)
-
+        const student_data_array = Array.isArray(student_data) ? student_data : [student_data]
+        const response = await db.collection('student').insertMany(student_data_array)
         res.status(200).json(response)
     }catch(err){
         console.log(err)
