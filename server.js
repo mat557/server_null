@@ -10,6 +10,7 @@ const authRoute = require('./routes/authRoutes')
 const teacherManager = require('./routes/teacherManager')
 const studentManager = require('./routes/studentManager')
 const committeManager = require('./routes/committeManager')
+const noticeManager = require('./routes/noticeManager')
 
 
 app.use(cors())
@@ -35,6 +36,7 @@ app.use('/auth'     , authRoute)
 app.use('/teacher'  , teacherManager)
 app.use('/student'  , studentManager)
 app.use('/committe' , committeManager)
+app.use('/notice'   , noticeManager)
 
 
 

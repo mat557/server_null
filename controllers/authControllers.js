@@ -438,7 +438,7 @@ const deleteImage = async (req,res) =>{
     try{
         const db = getDb()
         const id = req.params.id
-
+        console.log(id)
         if(!id){
             return res.status(404).json({
                 message : 'No id found',
