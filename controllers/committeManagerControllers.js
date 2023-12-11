@@ -7,8 +7,9 @@ const getAllCommitteMember = async (req,res) =>{
         const db = getDb()
         
         const committe = await db.collection('committe').find().toArray()
+        const count = await db.collection('committe').countDocuments()
         
-        // console.log(teachers)
+        
         if(!committe.length){
             return res.status(400).json({
                 committe,
@@ -17,6 +18,7 @@ const getAllCommitteMember = async (req,res) =>{
         }
 
         res.status(200).json({
+            count,
             committe,
             message: 'successfull!'
         })

@@ -36,6 +36,7 @@ const getAllNotices = async(req,res) =>{
     try{
         const db = getDb()
         const notices = await db.collection('notice').find().sort({ date: -1 }).toArray()
+        const count = await db.collection('notice').countDocuments()
 
         if(!notices.length){
             return res.status(400).json({
@@ -45,6 +46,7 @@ const getAllNotices = async(req,res) =>{
         }
 
         res.status(200).json({
+            count,
             notices,
             message: 'successful!'
         })

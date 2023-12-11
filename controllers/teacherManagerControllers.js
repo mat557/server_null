@@ -6,6 +6,7 @@ const getAllTeacher = async (req,res) =>{
     try{
         const db = getDb()
         const teachers = await db.collection('teacher').find().toArray()
+        const count = await db.collection('teacher').countDocuments()
 
         if(!teachers.length){
             return res.status(400).json({
@@ -15,6 +16,7 @@ const getAllTeacher = async (req,res) =>{
         }
 
         res.status(200).json({
+            count,
             teachers,
             message: 'successfull!'
         })
