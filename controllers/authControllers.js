@@ -91,7 +91,6 @@ const updateEditorials = async(req,res) =>{
 
         const email_d = req.email 
         const role_d  = req.role
-
         if(!email_d && (role_d === 'admin' || role_d === 'editor')){
             return res.status(404).json({
                 message : 'Unauthorized',
@@ -110,6 +109,12 @@ const updateEditorials = async(req,res) =>{
         if(!user){
             return res.status(403).json({
                 message : 'No user found',
+            })
+        }
+        
+        if(role_d === 'admin' && user.role === 'admin'){
+            return res.status(404).json({
+                message: "Admin role can't be changed!"
             })
         }
 
@@ -134,10 +139,10 @@ const updateEditorials = async(req,res) =>{
         };
 
         const result = await db.collection('editorial').updateOne(query, updateDoc, options);
-
-
-        res.status(200).json(result)
-
+        res.status(200).json({
+            result,
+            'message': "Updated!"
+        })
     }catch(err){
         console.log(err)
     }
@@ -284,7 +289,6 @@ const signUpForAdmin = async (req,res) =>{
         const saltRounds = 10;
         const hashedPass = await bcrypt.hash( password , saltRounds )
 
-        
         const user_doc = {
             email : email,
             name : name,
