@@ -435,7 +435,6 @@ const deleteEditoriaMember = async (req,res) =>{
             })
         }
         const delete_response = await db.collection('editorial').deleteOne(query)
-
         res.status(200).json(delete_response)
     }catch(err){
         console.log(err)
