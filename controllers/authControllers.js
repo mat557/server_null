@@ -111,7 +111,7 @@ const updateEditorials = async(req,res) =>{
                 message : 'No user found',
             })
         }
-        
+
         if(role_d === 'admin' && user.role === 'admin'){
             return res.status(404).json({
                 message: "Admin role can't be changed!"
@@ -428,6 +428,12 @@ const deleteEditoriaMember = async (req,res) =>{
 
         const query = { _id :new ObjectId(id) }
 
+        const admin = await db.collection('editorial').findOne(query)
+        if(admin.role === 'admin'){
+            return res.status(404).json({
+                message : "Admin can't be deleted",
+            })
+        }
         const delete_response = await db.collection('editorial').deleteOne(query)
 
         res.status(200).json(delete_response)
